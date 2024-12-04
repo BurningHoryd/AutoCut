@@ -7,12 +7,19 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+# Update system and install necessary build tools and dependencies
+RUN apt-get update && apt-get install -y \
+    gcc g++ make libffi-dev libssl-dev zlib1g-dev libjpeg-dev libpng-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
-
+# Set the working directory
 WORKDIR /app
+
+# Copy application files
 COPY . /app
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
