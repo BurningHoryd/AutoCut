@@ -9,11 +9,12 @@ COPY requirements.txt .
 
 # 필요한 패키지 설치를 위한 시스템 패키지 설치
 RUN apt-get update && \
-    apt-get install -y llvm llvm-dev && \
+    apt-get install -y llvm-10 llvm-10-dev && \
     apt-get clean
 
 # Pip 업그레이드 및 패키지 설치
 RUN pip install --upgrade pip && \
+    pip install --no-cache-dir numpy && \
     pip install --no-cache-dir -r requirements.txt
 
 # 필요한 파일들을 컨테이너에 복사
