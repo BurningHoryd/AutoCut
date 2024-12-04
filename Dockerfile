@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     liblapack-dev \
     libjpeg-dev \
     zlib1g-dev \
+    libtiff-dev \
+    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pip requirements
