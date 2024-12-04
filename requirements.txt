@@ -7,4 +7,4 @@ opencv_python==4.10.0.84
 opencv_python_headless==4.10.0.84
 pytesseract==0.3.13
 scipy==1.14.1
-scikit-image==0.19.3  # skimage 대신 scikit-image로 변경
+skimage==0.0
