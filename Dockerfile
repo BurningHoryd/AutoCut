@@ -1,11 +1,16 @@
 # 베이스 이미지로 Python 3.8 사용
-FROM python:3.8-slim
+FROM python:3.9-slim
 
 # 작업 디렉토리 설정
 WORKDIR /app
 
 # 필요한 패키지 목록을 requirements.txt에 작성해야 합니다.
 COPY requirements.txt .
+
+
+# Pip 업그레이드 추가
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 패키지 설치
 RUN pip install --no-cache-dir -r requirements.txt
