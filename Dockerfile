@@ -10,10 +10,17 @@ ENV PYTHONUNBUFFERED=1
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
+    python3-dev \
+    libatlas-base-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    libjpeg-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pip requirements
 COPY requirements.txt .
+RUN python -m pip install --upgrade pip  # pip 업그레이드
 RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
