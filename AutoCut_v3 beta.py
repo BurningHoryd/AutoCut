@@ -302,7 +302,7 @@ for video_file in video_files:
             # 지정된 위치에서 ROI 추출
             roi = gray[y1:y2, x1:x2]
 
-            # OCR을 사용하여 텍스트 추출
+            # OCR을 사용하여 텍���트 추출
             results = reader.readtext(roi)
 
             # OCR 결과에서 내 아이디 찾기
@@ -513,8 +513,8 @@ for video_file in video_files:
         reader = easyocr.Reader(['en'])  # 영어 텍스트 인식용
         
         # 결과 이미지 저장할 폴더 생성
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
+        # if not os.path.exists(output_folder):
+        #     os.makedirs(output_folder)  # 저장 부분 제거
         
         # 0.5초 간격으로 프레임 검사
         for t in range(int(end_time), int(end_time + max_search_time), 1):
@@ -534,10 +534,10 @@ for video_file in video_files:
                 for (bbox, text, prob) in results:
                     if 'HIGOO' in text.upper():
                         print(f"Found HIGOO at {t:.2f} seconds")
-                        # HIGOO를 찾은 전체 프레임 저장
-                        frame_filename = os.path.join(output_folder, f'result_frame_{t}.png')
-                        cv2.imwrite(frame_filename, frame_bgr)
-                        print(f"Saved result frame at {t} seconds: {frame_filename}")
+                        # HIGOO를 찾은 전체 프레임 저장 부분 제거
+                        # frame_filename = os.path.join(output_folder, f'result_frame_{t}.png')
+                        # cv2.imwrite(frame_filename, frame_bgr)
+                        # print(f"Saved result frame at {t} seconds: {frame_filename}")
                         return t, frame_bgr
                         
             except Exception as e:
