@@ -12,8 +12,6 @@ import easyocr
 from skimage.metrics import structural_similarity as ssim
 from datetime import datetime
 
-# Tesseract 실행 파일의 경로를 로컬 경로로 설정
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # 비디오 파일이 있는 폴더 설정
 video_folder = 'input'  # 비디오 파일들이 있는 폴더 경로
@@ -190,6 +188,10 @@ for video_file in video_files:
     # 원본 비디오 로드
     video = mp.VideoFileClip(video_path)
 
+    # EasyOCR 리더 초기화
+    reader = easyocr.Reader(['ko', 'en'])  # 한국어와 영어 지원
+
+    # OCR을 사용하여 텍스트 추출하는 함수 수정
     def extract_victory_or_defeat(clip):
         # 클립 끝나기 1초 전 프레임에서 결과 분석
         snapshot = clip.get_frame(clip.duration - 1)
@@ -201,8 +203,11 @@ for video_file in video_files:
         # 왼쪽 위 영역 지정 (예: x=0, y=0, width=200, height=50)
         roi = inverted[0:170, 0:450]  # y, x 순서로 지정
         
-        # OCR을 사용하여 텍스트 추출
-        result_text = pytesseract.image_to_string(roi, config='--psm 6').strip()  # OCR 결과
+        # EasyOCR을 사용하여 텍스트 추출
+        results = reader.readtext(roi)
+        
+        # 결과 리스트에서 텍스트 추출
+        result_text = " ".join([res[1] for res in results]).strip()  # OCR 결과 확인
         print(f"OCR Result: {result_text}")  # OCR 결과 확인
 
         result_text = re.sub(r'[^가-힣A-Za-z0-9]', '', result_text)  # 한글, 문, 숫자 제외한 모든 문자 제거
@@ -302,7 +307,7 @@ for video_file in video_files:
             # 지정된 위치에서 ROI 추출
             roi = gray[y1:y2, x1:x2]
 
-            # OCR을 사용하여 텍스트 추출
+            # OCR을 사용하여 텍스트로 추출
             results = reader.readtext(roi)
 
             # OCR 결과에서 내 아이디 찾기
@@ -513,8 +518,8 @@ for video_file in video_files:
         reader = easyocr.Reader(['en'])  # 영어 텍스트 인식용
         
         # 결과 이미지 저장할 폴더 생성
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
+        # if not os.path.exists(output_folder):
+        #     os.makedirs(output_folder)  # 저장 부분 제거
         
         # 0.5초 간격으로 프레임 검사
         for t in range(int(end_time), int(end_time + max_search_time), 1):
@@ -534,10 +539,10 @@ for video_file in video_files:
                 for (bbox, text, prob) in results:
                     if 'HIGOO' in text.upper():
                         print(f"Found HIGOO at {t:.2f} seconds")
-                        # HIGOO를 찾은 전체 프레임 저장
-                        frame_filename = os.path.join(output_folder, f'result_frame_{t}.png')
-                        cv2.imwrite(frame_filename, frame_bgr)
-                        print(f"Saved result frame at {t} seconds: {frame_filename}")
+                        # HIGOO를 찾은 전체 프레임 저장 부분 제거
+                        # frame_filename = os.path.join(output_folder, f'result_frame_{t}.png')
+                        # cv2.imwrite(frame_filename, frame_bgr)
+                        # print(f"Saved result frame at {t} seconds: {frame_filename}")
                         return t, frame_bgr
                         
             except Exception as e:
