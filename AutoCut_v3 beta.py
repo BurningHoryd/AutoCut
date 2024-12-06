@@ -6,7 +6,6 @@ from scipy.signal import correlate
 import moviepy.editor as mp
 from datetime import datetime
 import cv2
-import pytesseract
 from fuzzywuzzy import fuzz
 import easyocr
 from skimage.metrics import structural_similarity as ssim
@@ -137,32 +136,39 @@ for video_file in video_files:
     end_times = remove_close_times(end_times, tolerance=1.0)
     print(f"End times after removing close detections: {end_times}")
 
-    # 시작, 중간, 끝을 순서대로 매칭
-    print("Matching start, middle, and end times...")
+    # 중간 사운드 시간을 정렬하여 저장
+    middle_times_sorted = sorted(middle_times)  # 중간 시간을 정렬하여 변수에 저장
+
+    # 시작과 끝을 쌍으로 묶기
+    print("Pairing start and end times...")
     clip_segments = []
-    
-    # 정렬된 시간들
+
+    # 정렬된 start_times와 end_times
     start_times_sorted = sorted(start_times)
-    middle_times_sorted = sorted(middle_times)
     end_times_sorted = sorted(end_times)
 
-    i = j = k = 0  # start, middle, end 인덱스
-    while i < len(start_times_sorted) and j < len(middle_times_sorted) and k < len(end_times_sorted):
-        start = start_times_sorted[i]
-        middle = middle_times_sorted[j]
-        end = end_times_sorted[k]
+    start_index = 0
+    used_start_indices = set()
 
-        if start < middle < end:  # 올바른 순서인 경우
-            clip_segments.append((start, middle, end))
-            i += 1
-            j += 1
-            k += 1
-        elif middle <= start:  # 중간이 시작보다 앞에 있는 경우
-            j += 1
-        elif end <= middle:  # 끝이 중간보다 앞에 있는 경우
-            k += 1
-        else:  # 시작이 중간보다 뒤에 있는 경우
-            i += 1
+    for end_time in end_times_sorted:
+        # end_time 이전의 가장 가까운 start_time 찾기
+        candidate_index = -1
+        for i in range(start_index, len(start_times_sorted)):
+            if start_times_sorted[i] < end_time:
+                candidate_index = i
+            else:
+                break
+        if candidate_index != -1 and candidate_index not in used_start_indices:
+            start_time = start_times_sorted[candidate_index]
+            middle = next((m for m in middle_times_sorted if m > start_time), None)  # 중간 추가
+            clip_segments.append((start_time, middle, end_time))  # 중간 추가
+            used_start_indices.add(candidate_index)
+            start_index = candidate_index + 1  # 다음 검색을 위해 인덱스 업데이트
+
+
+    for idx, (start, middle, end) in enumerate(clip_segments):
+        middle = next((m for m in middle_times_sorted if m > start), None)
+        clip_segments[idx] = (start, middle, end)  # 중간 추가
 
     print("Clip segments (start, middle, and end times):")
     for i, (start, middle, end) in enumerate(clip_segments):
@@ -191,7 +197,7 @@ for video_file in video_files:
     # EasyOCR 리더 초기화
     reader = easyocr.Reader(['ko', 'en'])  # 한국어와 영어 지원
 
-    # OCR을 사용하여 텍스트 추출하는 함수 수정
+    # OCR을 사용하여 텍스트 추출하는 함수 ��정
     def extract_victory_or_defeat(clip):
         # 클립 끝나기 1초 전 프레임에서 결과 분석
         snapshot = clip.get_frame(clip.duration - 1)
@@ -307,7 +313,7 @@ for video_file in video_files:
             # 지정된 위치에서 ROI 추출
             roi = gray[y1:y2, x1:x2]
 
-            # OCR을 사용하여 텍스트로 추출
+            # OCR을 사용하여 텍스트 추출
             results = reader.readtext(roi)
 
             # OCR 결과에서 내 아이디 찾기
@@ -334,7 +340,7 @@ for video_file in video_files:
         # overlay_image가 RGBA일 경우
         if overlay_image.shape[2] == 4:
             # 알파 채널이 있는 경우
-            alpha_channel = overlay_image[:, :, 3] / 255.0  # 알파 값을 0~1로 정규화
+            alpha_channel = overlay_image[:, :, 3] / 255.0  # 알파 값을 0~1로 정화
             overlay_rgb = overlay_image[:, :, :3]  # RGB만 출
             
             # base_image overlay_image를 겹치기
@@ -462,7 +468,7 @@ for video_file in video_files:
         # ROI 이미지를 저장할 리스트
         roi_images = []
 
-        # 시작 시점부터 5초간 프레임 추출
+        # 시작 시점부터 5초간 프레임 ���출
         for seconds in range(6):  # 0, 1, 2, 3, 4, 5초
             current_time = start_time + seconds
             print(f"Extracting frame at {current_time} seconds from clip start")
@@ -514,7 +520,7 @@ for video_file in video_files:
 
 
     def find_result_frame(clip, end_time, max_search_time=20, output_folder='result_images'):
-        """끝 사운드 이후 HIGOO 텍스트가 있는 프레임 찾기"""
+        """끝 사운드 이후 HIGOO 텍��트가 있는 프레임 찾기"""
         reader = easyocr.Reader(['en'])  # 영어 텍스트 인식용
         
         # 결과 이미지 저장할 폴더 생성
@@ -584,7 +590,7 @@ for video_file in video_files:
                         # 파일 이름에서 숫자 추출 (예: "1.png" -> 1)
                         best_match = int(os.path.splitext(template_file)[0])
                 
-                return best_match  # 유사한 숫자가 없으면 None 반환
+                return best_match  # 유사한 숫자가 으면 None 반환
             
             # 각 자리수 인식
             k_tens = match_number(kill_tens)
