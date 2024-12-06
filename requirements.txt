@@ -2,7 +2,6 @@ numpy
 librosa
 moviepy
 opencv-python
-pytesseract
 fuzzywuzzy
 easyocr
 scikit-image
